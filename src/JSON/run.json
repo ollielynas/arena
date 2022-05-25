@@ -1,0 +1,23 @@
+
+{
+    "input_nodes": [
+        {"bias":0, "value":1},
+        {"bias":0, "value":1}
+    ],
+    "hidden_nodes_1": [
+        {"bias":0, "value":1, "weights":[1,1]},
+        {"bias":0, "value":1, "weights":[1,1]},
+        {"bias":0, "value":1, "weights":[1,1]},
+        {"bias":0, "value":1, "weights":[1,1]}
+    ],
+    "hidden_nodes_2": [
+        {"bias":0, "value":1, "weights":[1,1,1,1]},
+        {"bias":0, "value":1, "weights":[1,1,1,1]},
+        {"bias":0, "value":1, "weights":[1,1,1,1]},
+        {"bias":0, "value":1, "weights":[1,1,1,1]}
+    ],
+    "output_nodes": [
+        {"bias":0, "value":1, "weights":[1,1,1,1]},
+        {"bias":0, "value":1, "weights":[1,1,1,1]}
+    ]
+}
