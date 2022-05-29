@@ -8,6 +8,7 @@ use std::{
 };
 use rand::Rng;
 
+use std::time::Instant;
 
 mod smooth_brain;
 mod seg;
@@ -24,9 +25,8 @@ extern crate find_folder;
 use speedy2d::color::Color;
 use speedy2d::shape::{Rectangle};
 use speedy2d::{Graphics2D, Window};
-use speedy2d::window::{MouseButton, WindowHandler, WindowHelper, WindowStartupInfo};
+use speedy2d::window::{MouseButton, WindowHandler, WindowHelper};
 
-extern crate num_cpus;
 
 
 // -------------------------------------------------------------|
@@ -141,7 +141,7 @@ impl PhysObj{
         let attack = ((0.0,0.0),(0.0,0.0));
 
         for i in enemy_list {
-            
+
         }
     }
 
@@ -197,8 +197,12 @@ o8o        o888o `Y888""8o o888o o888o o888o      8""88888P'  o888o o888o o888o 
 
 fn main_sim(brain:u8, render:bool) -> BrainScore {
 
+    let brain_lookup:Vec<String> = vec![
+        "src/JSON/run.json".to_string(),
+        "src/JSON/run_jump.json".to_string()
+        ];
 
-    let mut matrix_str: String = std::fs::read_to_string("src/JSON/run.json").unwrap();
+    let mut matrix_str: String = std::fs::read_to_string(&brain_lookup[brain as usize]).unwrap();
     matrix_str = smooth_brain::v1::mutate(&matrix_str);
 
     let mut level_num = 1;
@@ -244,6 +248,19 @@ fn new_enemy(brain: u8) -> PhysObj{
         iframes: 10.0,
     };
 }
+
+
+/*
+ .oooooo..o     .                          .        oooo                                  oooo  
+d8P'    `Y8   .o8                        .o8        `888                                  `888  
+Y88bo.      .o888oo  .oooo.   oooo d8b .o888oo       888   .ooooo.  oooo    ooo  .ooooo.   888  
+ `"Y8888o.    888   `P  )88b  `888""8P   888         888  d88' `88b  `88.  .8'  d88' `88b  888  
+     `"Y88b   888    .oP"888   888       888         888  888ooo888   `88..8'   888ooo888  888  
+oo     .d8P   888 . d8(  888   888       888 .       888  888    .o    `888'    888    .o  888  
+8""88888P'    "888" `Y888""8o d888b      "888"      o888o `Y8bod8P'     `8'     `Y8bod8P' o888o 
+                                                                                                
+                                                                                                
+                                                                                                */
 
 fn start_level(level_num: u32, brain: u8, render:bool, matrix_s:String, mut score: i32) -> Vec<i32> {
 
@@ -368,30 +385,80 @@ struct Switch {
     length: f32,
     text: String,
     state: bool,
+    onclick: fn(bool)
 }
+
+
+
 
 struct MyWindowHandler {
     //text: Rc<FormattedTextBlock>
     switches: Vec<Switch>,
     rsrc_dir: String,
+    network: String,
+    mouse_vec: speedy2d::dimen::Vector2<f32>,
+    timer: std::time::Instant,
+    brain: u8
 }
 
 impl WindowHandler for MyWindowHandler
 {
 
+/*ooo        ooooo                                          
+`88.       .888'                                          
+ 888b     d'888   .ooooo.  oooo  oooo   .oooo.o  .ooooo.  
+ 8 Y88. .P  888  d88' `88b `888  `888  d88(  "8 d88' `88b 
+ 8  `888'   888  888   888  888   888  `"Y88b.  888ooo888 
+ 8    Y     888  888   888  888   888  o.  )88b 888    .o 
+o8o        o888o `Y8bod8P'  `V88V"V8P' 8""888P' `Y8bod8P' 
+                                                          
+                                                          
+                                                          */
+    fn on_mouse_move(&mut self, helper: &mut WindowHelper, position: speedy2d::dimen::Vector2<f32>)
+    {
+        self.mouse_vec = position;
+    }
+
     fn on_mouse_button_down(&mut self, helper: &mut WindowHelper, button: MouseButton) {
-        
+        for b in &mut self.switches {
+            if self.mouse_vec.x > b.x && self.mouse_vec.x < b.x + b.length*12.0 && self.mouse_vec.y > b.y && self.mouse_vec.y < b.y + 30.0 {
+                b.state = !b.state;
+                println!("{}", b.text);
+                helper.request_redraw();
+                if b.text.chars().collect::<Vec<char>>().contains(&'@') {
+                    println!("{}", b.text);
+                    helper.request_redraw();
+                    // async function call
+                    sleep(Duration::from_millis(1000));
+                    b.state = !b.state;
+                }
+            }
+            else {
+            }
+        }
     }
 
 
-
+/*
+oooooooooo.                                       
+`888'   `Y8b                                      
+ 888      888 oooo d8b  .oooo.   oooo oooo    ooo 
+ 888      888 `888""8P `P  )88b   `88. `88.  .8'  
+ 888      888  888      .oP"888    `88..]88..8'   
+ 888     d88'  888     d8(  888     `888'`888'    
+o888bood8P'   d888b    `Y888""8o     `8'  `8'     
+                                                  
+                                                  
+                                                  */
 
     fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D)
     {
 
+
+
         graphics.clear_screen(Color::from_rgb(0.25, 0.25, 0.25));
         graphics.draw_rectangle(
-        Rectangle::from_tuples((650.0, 150.0), (1150.0, 650.0)),
+        Rectangle::from_tuples((654.0, 150.0), (1154.0, 650.0)),
         Color::from_rgb(0.1, 0.1, 0.1));
 
 
@@ -400,6 +467,7 @@ impl WindowHandler for MyWindowHandler
 
     
         seg::display::text16(graphics, &mut vec![
+
             (0.0, String::from("hello")),
             (1.0, String::from(format!("player x{} y{} vx{} vy{} ifr{} hp{}", array[0].x(), array[0].y(), array[0].vx(), array[0].vy(), array[0].iframes(), array[0].hp()))),
             (2.0, String::from(format!("en1 x{} y{} vx{} vy{} ifr{} hp{}", array[1].x().floor(), array[1].y().floor(), (array[1].vx()*10.0).floor()/10.0, array[1].vy(), array[1].iframes(), array[1].hp()))),
@@ -416,7 +484,7 @@ impl WindowHandler for MyWindowHandler
                 obj_color = vec![0.4,0.8,0.4];
             }
 
-            if i.iframes() <= 0.0 {
+            if i.iframes() > 0.0 {
                 obj_color[0] = 1.0;
             }
             graphics.draw_rectangle(
@@ -424,6 +492,8 @@ impl WindowHandler for MyWindowHandler
             ((i.x() as f32 + i.width() as f32)+650.0, (i.y() as f32 + i.height() as f32) +150.0)),
             Color::from_rgb(obj_color[0], obj_color[1], obj_color[2]));
         }
+
+
 
         for s in &mut self.switches {
             let color;
@@ -435,10 +505,173 @@ impl WindowHandler for MyWindowHandler
 
             let mut text: Vec<char> = s.text.clone().chars().collect();
             for t in 0..text.len() {
+            if text[t] != '@' {
             seg::display::write_letter(graphics, &mut text[t], (s.x+(t as f32)*14.0)+2.0, s.y+5.0);
-            }}
+            }}}
+
 
         helper.request_redraw();
+
+
+
+
+
+
+
+        let mtx: smooth_brain::v1::Matrix2442 = serde_json::from_str(&self.network).unwrap();
+        
+        for i in 0..mtx.input_nodes.len() {
+            let space = 300.0/mtx.input_nodes.len() as f32;
+            graphics.draw_circle((50.0,380.0+(i as f32*space)), 4.0, Color::BLACK);
+        }
+
+
+        for l in 0..mtx.hidden_nodes.len() {
+            let space_x = 400.0/mtx.hidden_nodes.len() as f32;
+            for n in 0..mtx.hidden_nodes[l].len() {
+                let space_y = 300.0/mtx.hidden_nodes[l].len() as f32;
+                graphics.draw_circle(((l as f32*space_x)+ 150.0,350.0+(n as f32*space_y)), 4.0, Color::BLACK);
+                if l > 0 {
+                for p in 0..mtx.hidden_nodes[l-1].len() {
+                let mut weight = 0.5;
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 0.5 {
+                    weight = 0.6
+                }
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 1.0 {
+                    weight = 0.8
+                }
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 2.0 {
+                    weight = 1.2
+                }
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 5.0 {
+                    weight = 2.0
+                }
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 10.0 {
+                    weight = 4.0
+                }
+
+                let mut color = Color::from_rgb(0.0, 0.0, 0.0);
+
+                if mtx.hidden_nodes[l][n].weights[p].abs() > 0.0 {
+                    color = Color::from_rgb(0.0, 0.1, 0.0);
+                }
+
+                if mtx.hidden_nodes[l][n].weights[p].abs() < 0.0 {
+                    color = Color::from_rgb(0.1, 0.0, 0.0);
+                }
+
+                graphics.draw_line(
+                    ((l as f32*space_x)+ 150.0,350.0+(n as f32*space_y)),
+                    (((l-1) as f32*space_x)+ 150.0,350.0+(p as f32*300.0/mtx.hidden_nodes[l-1].len() as f32)),
+                    weight,
+                    color
+                )}}
+                else {
+                    for p in 0..mtx.input_nodes.len() {
+                    let mut weight = 0.5;
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 0.5 {
+                        weight = 0.6
+                    }
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 1.0 {
+                        weight = 0.8
+                    }
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 2.0 {
+                        weight = 1.2
+                    }
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 5.0 {
+                        weight = 2.0
+                    }
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 10.0 {
+                        weight = 4.0
+                    }
+
+                    let mut color = Color::from_rgb(0.0, 0.0, 0.0);
+
+                    if mtx.hidden_nodes[0][n].weights[p].abs() > 0.0 {
+                        color = Color::from_rgb(0.0, 0.1, 0.0);
+                    }
+
+                    if mtx.hidden_nodes[0][n].weights[p].abs() < 0.0 {
+                        color = Color::from_rgb(0.1, 0.0, 0.0);
+                    }
+
+                    graphics.draw_line(
+                        ((l as f32*space_x)+ 150.0,350.0+(n as f32*space_y)),
+                        (50.0,380.0+(p as f32*(300.0/mtx.input_nodes.len() as f32))),
+                        weight,
+                        color
+                    )
+                }
+                for i in 0..mtx.output_nodes.len() {
+                    let space = 300.0/mtx.output_nodes.len() as f32;
+                    graphics.draw_circle((450.0,380.0+(i as f32*space)), 4.0, Color::BLACK);
+                    for j in 0..mtx.output_nodes[i].weights.len() {
+                        let mut weight = 0.5;
+                        if mtx.output_nodes[i].weights[j].abs() > 0.5 {
+                            weight = 0.6
+                        }
+                        if mtx.output_nodes[i].weights[j].abs() > 1.0 {
+                            weight = 0.8
+                        }
+                        if mtx.output_nodes[i].weights[j].abs() > 2.0 {
+                            weight = 1.2
+                        }
+                        if mtx.output_nodes[i].weights[j].abs() > 5.0 {
+                            weight = 2.0
+                        }
+                        if mtx.output_nodes[i].weights[j].abs() > 10.0 {
+                            weight = 4.0
+                        }
+
+                        let mut color = Color::from_rgb(0.0, 0.0, 0.0);
+
+                        if mtx.output_nodes[i].weights[j].abs() > 0.0 {
+                            color = Color::from_rgb(0.0, 0.1, 0.0);
+                        }
+
+                        if mtx.output_nodes[i].weights[j].abs() < 0.0 {
+                            color = Color::from_rgb(0.1, 0.0, 0.0);
+                        }
+
+                        graphics.draw_line(
+                            (450.0,380.0+(i as f32*space)),
+                            (((l+1) as f32*space_x)+ 150.0,350.0+(j as f32*300.0/mtx.output_nodes[i].weights.len() as f32)),
+                            weight,
+                            color
+                        )
+                    }
+                }
+                }
+            }
+        }
+
+                /*
+ooooooooooooo  o8o                                       
+8'   888   `8  `"'                                       
+     888      oooo  ooo. .oo.  .oo.    .ooooo.  oooo d8b 
+     888      `888  `888P"Y88bP"Y88b  d88' `88b `888""8P 
+     888       888   888   888   888  888ooo888  888     
+     888       888   888   888   888  888    .o  888     
+    o888o     o888o o888o o888o o888o `Y8bod8P' d888b    
+*/
+
+            // tell if a second has passed 
+
+
+        if Instant::now().duration_since(self.timer) > Duration::from_secs(3) {
+
+            let brain_lookup:Vec<String> = vec![
+                "src/JSON/run.json".to_string(),
+                "src/JSON/run_jump.json".to_string()
+            ];
+
+            self.timer = Instant::now();
+            self.network = std::fs::read_to_string(&brain_lookup[self.brain as usize]).unwrap();
+        
+    }
+
+    helper.request_redraw();
+
     }
 }
 
@@ -474,15 +707,35 @@ fn main() {
     let switches = vec![
         Switch {
             x: 10.0,
-            y: 400.0,
+            y: 200.0,
             length: 4.0,
             text: "test".to_string(),
             state: false,
+            onclick: |_| {println!("test")},
+        },
+
+        Switch {
+            x: 10.0,
+            y: 250.0,
+            length: 8.0,
+            text: "Display".to_string(),
+            state: false,
+            onclick: |_| {},
+        },
+
+        Switch {
+            x: 10.0,
+            y: 300.0,
+            length: 3.0,
+            text: "@generate network".to_string(),
+            state: false,
+            onclick: |_| {
+                // dialog box for number
+                println!("generate network");
+            },
         },
 
     ];
-
-    
 
     let mut rsrc_dir = std::env::current_exe()
     .expect("Can't find path to executable");
@@ -490,13 +743,10 @@ fn main() {
     rsrc_dir.push("JSON");
     
     let brain:u8 = 0;
-    let mut generation = 0;
 
         thread::spawn( move|| {
     println!("work Thread");
     loop {
-        generation += 1;
-        println!("Generation {}", generation);
         let mut hands = vec![
             thread::spawn(move || {
                 {
@@ -504,7 +754,7 @@ fn main() {
                 }
             }),
         ];
-            for _ in 0..5 { // 10 threads/ or generations are created where they will play till they die. they will then be given a score
+            for _ in 0..5 {
                 hands.push( thread::spawn(|| {
                     main_sim(0, false)
                 }));
@@ -520,7 +770,6 @@ fn main() {
             generation_result.push(cur_thread.join().unwrap());
         }
 
-        println!("finished all threads: {}", generation_result.len());
 
         // once all the threads have finished they are ranked
         let mut best = 0;
@@ -551,9 +800,25 @@ fn main() {
 
 
 
+        let brain_lookup:Vec<String> = vec![
+            "src/JSON/run.json".to_string(),
+            "src/JSON/run_jump.json".to_string()
+        ];
+
+    let matrix_str: String = std::fs::read_to_string(&brain_lookup[*&brain as usize]).unwrap();
+
+
+    let now = Instant::now();
 
     let window = Window::new_centered("Title", (1200, 700)).unwrap();
-    window.run_loop(MyWindowHandler{switches: switches, rsrc_dir: rsrc_dir.clone().to_str().unwrap().to_string()});
+    window.run_loop(MyWindowHandler{
+        switches: switches,
+        rsrc_dir: rsrc_dir.clone().to_str().unwrap().to_string(),
+        network: matrix_str, // matrix_str | new_br
+        mouse_vec: speedy2d::dimen::Vector2::new(0.0, 0.0),
+        timer: now,
+        brain: brain
+        });
 
 
 }

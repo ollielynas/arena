@@ -25,13 +25,13 @@ pub mod display {
 
         // ------
 
-        if "02356789?@abcdefgiopqrstz$&".chars().collect::<Vec<char>>().contains(&c) {
+        if "02356789?abcdefgiopqrstz$&".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+0.0, y+0.0), (x+10.0, y+0.0), 1.5, color);
         }
 
         // |\|/|
 
-        if "045689@acefghklmnopqrsuvwy".chars().collect::<Vec<char>>().contains(&c) {
+        if "045689acefghklmnopqrsuvwy".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+0.0, y+0.0), (x+0.0, y+10.0), 1.5, color);
         }
         if "mnx\\)&>".chars().collect::<Vec<char>>().contains(&c) {
@@ -43,7 +43,7 @@ pub mod display {
         if "10<kmvxz(/".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+5.0, y+10.0), (x+10.0, y+0.0), 1.5, color);
         }
-        if "01234789?@abdhjmnopqruwy".chars().collect::<Vec<char>>().contains(&c) {
+        if "01234789?abdhjmnopqruwy".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+10.0, y+0.0), (x+10.0, y+10.0), 1.5, color);
         }
 
@@ -83,17 +83,13 @@ pub mod display {
         if ":".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+0.0, y+5.0), (x+3.0, y+5.0), 3.0, color);
             g.draw_line((x+0.0, y+15.0), (x+3.0, y+15.0), 3.0, color);
-
         }
-
         if "0235689bcdeijsgloquyz_&".chars().collect::<Vec<char>>().contains(&c) {
             g.draw_line((x+0.0, y+20.0), (x+10.0, y+20.0), 1.5, color);
         }
-
     }
 
     pub fn text16(g: &mut Graphics2D, d: &mut Vec<(f32, String)>) {
-
 
         for i in 0..d.len() {
             let mut text: Vec<char> = d[i].1.clone().chars().collect();

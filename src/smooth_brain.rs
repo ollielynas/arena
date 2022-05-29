@@ -6,26 +6,30 @@ pub mod v1 {
 
 use serde_derive::{Deserialize, Serialize};
 use rand::Rng;
+extern crate clipboard;
+
+use clipboard::ClipboardProvider;
+use clipboard::ClipboardContext;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputNode {
-    bias:f32,
-    value:f32,
+    pub bias:f32,
+    pub value:f32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
-    bias:f32,
-    value:f32,
-    weights:Vec<f32>,
+    pub bias:f32,
+    pub value:f32,
+    pub weights:Vec<f32>,
 }
 
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Matrix2442 {
-    input_nodes: Vec<InputNode>,
-    hidden_nodes: Vec<Vec<Node>>,
-    output_nodes: Vec<Node>
+    pub input_nodes: Vec<InputNode>,
+    pub hidden_nodes: Vec<Vec<Node>>,
+    pub output_nodes: Vec<Node>
 }
 
     pub fn mutate(mx: &String) -> String {
@@ -64,6 +68,61 @@ pub struct Matrix2442 {
 
     }
 
+    pub fn new_matrix(inputs: f32, layers:f32, nodes:f32, outputs:f32) -> String {
+        let mut nmx = Matrix2442 {
+            input_nodes: Vec::new(),
+            hidden_nodes: Vec::new(),
+            output_nodes: Vec::new()
+        };
+
+        for _ in 0..inputs as usize{
+            nmx.input_nodes.push(InputNode {
+                bias: 0.0,
+                value: 0.0,
+            });
+        }
+
+
+        for i in 0..layers as usize {
+            let mut weights_list: Vec<f32> = Vec::new();
+            if i == 0 {
+                for _ in 0..inputs as usize {
+                    weights_list.push(0.0)
+                }
+            }else {
+                for _ in 0..nodes as usize {
+                    weights_list.push(0.0)
+                }
+            }
+            nmx.hidden_nodes.push(Vec::new());
+            for _ in 0..nodes as usize {
+                nmx.hidden_nodes[i].push(Node {
+                    bias: 0.0,
+                    value: 0.0,
+                    weights: weights_list.clone(),
+                });
+            }
+        }
+
+        for _ in 0..outputs as usize {
+            let mut weights_list: Vec<f32> = Vec::new();
+            for _ in 0..nodes as usize {
+                weights_list.push(0.0)
+            }
+            nmx.output_nodes.push(Node {
+                bias: 0.0,
+                value: 0.0,
+                weights: weights_list,
+            });
+        }
+
+        let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+        ctx.set_contents(serde_json::to_string_pretty(&nmx).unwrap().to_owned()).unwrap();
+        serde_json::to_string_pretty(&nmx).unwrap()
+
+
+    }
+
     pub fn run(mut mx: Matrix2442, inputs: Vec<f64>) -> Vec<bool> {
 
 
@@ -89,8 +148,6 @@ pub struct Matrix2442 {
         }
         }
     }
-
-
         for i in 0..mx.output_nodes.len() {
             mx.output_nodes[i].value += mx.output_nodes[i].bias;
         for j in 0..mx.output_nodes[i].weights.len() {
