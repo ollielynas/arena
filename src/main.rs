@@ -27,6 +27,8 @@ use speedy2d::shape::{Rectangle};
 use speedy2d::{Graphics2D, Window};
 use speedy2d::window::{MouseButton, WindowHandler, WindowHelper};
 
+use std::process::Command;
+
 
 
 // -------------------------------------------------------------|
@@ -423,13 +425,11 @@ o8o        o888o `Y8bod8P'  `V88V"V8P' 8""888P' `Y8bod8P'
         for b in &mut self.switches {
             if self.mouse_vec.x > b.x && self.mouse_vec.x < b.x + b.length*12.0 && self.mouse_vec.y > b.y && self.mouse_vec.y < b.y + 30.0 {
                 b.state = !b.state;
-                println!("{}", b.text);
                 helper.request_redraw();
+                b.onclick.clone()(b.state);
                 if b.text.chars().collect::<Vec<char>>().contains(&'@') {
-                    println!("{}", b.text);
                     helper.request_redraw();
                     // async function call
-                    sleep(Duration::from_millis(1000));
                     b.state = !b.state;
                 }
             }
@@ -454,7 +454,25 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
     fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D)
     {
 
+        if !self.switches[0].state {
+            let s = &mut self.switches[0];
+            graphics.clear_screen(Color::from_rgb(0.25, 0.25, 0.25));
+            let color;
+            if s.state {color = Color::from_rgb(0.0, 0.5, 0.)}
+            else {color = Color::from_rgb(0.3, 0.1, 0.1)}
+            graphics.draw_rectangle(
+                Rectangle::from_tuples((s.x, s.y), (s.x + 10.0 + (s.length * 12.0), s.y + 30.0)),
+                color);
 
+            let mut text: Vec<char> = s.text.clone().chars().collect();
+            for t in 0..text.len() {
+            if text[t] != '@' {
+            seg::display::write_letter(graphics, &mut text[t], (s.x+(t as f32)*14.0)+2.0, s.y+5.0);
+            }
+        }
+            helper.request_redraw();
+            return;
+        }
 
         graphics.clear_screen(Color::from_rgb(0.25, 0.25, 0.25));
         graphics.draw_rectangle(
@@ -467,8 +485,6 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
 
     
         seg::display::text16(graphics, &mut vec![
-
-            (0.0, String::from("hello")),
             (1.0, String::from(format!("player x{} y{} vx{} vy{} ifr{} hp{}", array[0].x(), array[0].y(), array[0].vx(), array[0].vy(), array[0].iframes(), array[0].hp()))),
             (2.0, String::from(format!("en1 x{} y{} vx{} vy{} ifr{} hp{}", array[1].x().floor(), array[1].y().floor(), (array[1].vx()*10.0).floor()/10.0, array[1].vy(), array[1].iframes(), array[1].hp()))),
             (3.0, String::from(format!("number of obj: {}", array.len()))),
@@ -496,18 +512,23 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
 
 
         for s in &mut self.switches {
-            let color;
+            let mut color;
             if s.state {color = Color::from_rgb(0.0, 0.5, 0.)}
             else {color = Color::from_rgb(0.3, 0.1, 0.1)}
+            let mut text: Vec<char> = s.text.clone().chars().collect();
+            if text.contains(&'@') {
+                color = Color::from_rgb(1.0, 0.5, 0.0);
+            }
             graphics.draw_rectangle(
                 Rectangle::from_tuples((s.x, s.y), (s.x + 10.0 + (s.length * 12.0), s.y + 30.0)),
                 color);
 
-            let mut text: Vec<char> = s.text.clone().chars().collect();
             for t in 0..text.len() {
             if text[t] != '@' {
             seg::display::write_letter(graphics, &mut text[t], (s.x+(t as f32)*14.0)+2.0, s.y+5.0);
-            }}}
+            }
+
+        }}
 
 
         helper.request_redraw();
@@ -604,7 +625,7 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
                 }
                 for i in 0..mtx.output_nodes.len() {
                     let space = 300.0/mtx.output_nodes.len() as f32;
-                    graphics.draw_circle((450.0,380.0+(i as f32*space)), 4.0, Color::BLACK);
+                    graphics.draw_circle((550.0,380.0+(i as f32*space)), 4.0, Color::BLACK);
                     for j in 0..mtx.output_nodes[i].weights.len() {
                         let mut weight = 0.5;
                         if mtx.output_nodes[i].weights[j].abs() > 0.5 {
@@ -634,8 +655,8 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
                         }
 
                         graphics.draw_line(
-                            (450.0,380.0+(i as f32*space)),
-                            (((l+1) as f32*space_x)+ 150.0,350.0+(j as f32*300.0/mtx.output_nodes[i].weights.len() as f32)),
+                            (550.0,380.0+(i as f32*space)),
+                            (((mtx.hidden_nodes.len()-1) as f32*space_x)+ 150.0,350.0+(j as f32*300.0/mtx.output_nodes[i].weights.len() as f32)),
                             weight,
                             color
                         )
@@ -675,6 +696,10 @@ ooooooooooooo  o8o
     }
 }
 
+fn generate_new_network() {
+    smooth_brain::v1::new_matrix(2.0,4.0,10.0,2.0);
+}
+
 
 
 struct BrainScore {
@@ -705,34 +730,26 @@ fn main() {
 
 
     let switches = vec![
-        Switch {
-            x: 10.0,
-            y: 200.0,
-            length: 4.0,
-            text: "test".to_string(),
-            state: false,
-            onclick: |_| {println!("test")},
-        },
 
-        Switch {
+        Switch { // always keep this as the first in the list
             x: 10.0,
-            y: 250.0,
+            y: 10.0,
             length: 8.0,
             text: "Display".to_string(),
-            state: false,
+            state: true,
             onclick: |_| {},
         },
 
         Switch {
             x: 10.0,
             y: 300.0,
-            length: 3.0,
+            length: 20.0,
             text: "@generate network".to_string(),
             state: false,
             onclick: |_| {
-                // dialog box for number
-                println!("generate network");
+                generate_new_network();
             },
+            
         },
 
     ];
@@ -747,28 +764,29 @@ fn main() {
         thread::spawn( move|| {
     println!("work Thread");
     loop {
-        let mut hands = vec![
+
+
+        let mut hands: Vec<thread::JoinHandle<_>> = vec![
             thread::spawn(move || {
                 {
                 main_sim(brain, false)
                 }
             }),
         ];
-            for _ in 0..5 {
+        let mut generation_result = Vec::new();
+            for _ in 0..10 {
+            for _ in 0..10 {
                 hands.push( thread::spawn(|| {
                     main_sim(0, false)
                 }));
             };
-
-            println!("started all threads: {}", hands.len());
-
-
-        let mut generation_result = Vec::new();
         
         while hands.len() > 0 { // the 10 threads are put in a list
             let cur_thread = hands.remove(0); // moves it into cur_thread
             generation_result.push(cur_thread.join().unwrap());
         }
+
+    }
 
 
         // once all the threads have finished they are ranked
