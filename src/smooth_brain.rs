@@ -24,8 +24,7 @@ pub struct Node {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Matrix2442 {
     input_nodes: Vec<InputNode>,
-    hidden_nodes_1: Vec<Node>,
-    hidden_nodes_2: Vec<Node>,
+    hidden_nodes: Vec<Vec<Node>>,
     output_nodes: Vec<Node>
 }
 
@@ -39,23 +38,17 @@ pub struct Matrix2442 {
         }
         // println!("{:?}", mxo);
 
-        for i in 0..mxo.hidden_nodes_1.len() {
-            let rng_num = rng.gen_range(-1.0..1.0);
-            mxo.hidden_nodes_1[i].bias += rng_num;
-            for j in 0..mxo.hidden_nodes_1[i].weights.len() {
-                let rng_num = rng.gen_range(-0.1..0.1);
-                mxo.hidden_nodes_1[i].weights[j] += rng_num;
+        for k in 0..mxo.hidden_nodes.len() {
+            for i in 0..mxo.hidden_nodes[k].len() {
+                let rng_num = rng.gen_range(-1.0..1.0);
+                mxo.hidden_nodes[k][i].bias += rng_num;
+                for j in 0..mxo.hidden_nodes[k][i].weights.len() {
+                    let rng_num = rng.gen_range(-0.1..0.1);
+                    mxo.hidden_nodes[k][i].weights[j] += rng_num;
+                }
             }
         }
 
-        for i in 0..mxo.hidden_nodes_2.len() {
-            let rng_num = rng.gen_range(-1.0..1.0);
-            mxo.hidden_nodes_2[i].bias += rng_num;
-            for j in 0..mxo.hidden_nodes_2[i].weights.len() {
-                let rng_num = rng.gen_range(-0.1..0.1);
-                mxo.hidden_nodes_2[i].weights[j] += rng_num;
-            }
-        }
 
         for i in 0..mxo.output_nodes.len() {
             let rng_num = rng.gen_range(-1.0..1.0);
@@ -81,24 +74,27 @@ pub struct Matrix2442 {
             mx.input_nodes[i].value = inputs[i] as f32;
         }
 
-        for i in 0..mx.hidden_nodes_1.len() {
-            mx.hidden_nodes_1[i].value += mx.hidden_nodes_1[i].bias;
-        for j in 0..mx.hidden_nodes_1[i].weights.len() {
-                mx.hidden_nodes_1[i].value += mx.input_nodes[j].value * mx.hidden_nodes_1[i].weights[j];
-        }
-        }
 
-        for i in 0..mx.hidden_nodes_2.len() {
-            mx.hidden_nodes_2[i].value += mx.hidden_nodes_2[i].bias;
-        for j in 0..mx.hidden_nodes_2[i].weights.len() {
-                mx.hidden_nodes_2[i].value += mx.hidden_nodes_1[j].value * mx.hidden_nodes_2[i].weights[j];
+
+
+        for k in 0..mx.hidden_nodes.len() {
+            for i in 0..mx.hidden_nodes[k].len() {
+            mx.hidden_nodes[k][i].value += mx.hidden_nodes[k][i].bias;
+        for j in 0..mx.hidden_nodes[k][i].weights.len() {
+                if j == 0 {
+                mx.hidden_nodes[k][i].value += mx.input_nodes[j].value * mx.hidden_nodes[k][i].weights[j];
+                } else {
+                mx.hidden_nodes[k][i].value += mx.hidden_nodes[k][j-1].value * mx.hidden_nodes[k][i].weights[j];
+                }
         }
         }
+    }
+
 
         for i in 0..mx.output_nodes.len() {
             mx.output_nodes[i].value += mx.output_nodes[i].bias;
         for j in 0..mx.output_nodes[i].weights.len() {
-                mx.output_nodes[i].value += mx.hidden_nodes_2[j].value * mx.output_nodes[i].weights[j];
+                mx.output_nodes[i].value += mx.hidden_nodes[mx.hidden_nodes.len()-1][j].value * mx.output_nodes[i].weights[j];
         }
         }
 
@@ -110,6 +106,11 @@ pub struct Matrix2442 {
         action[1] = mx.output_nodes[1].value >= 0.0;
     }
 
+    if mx.output_nodes.len() == 3 {
+        action[0] = mx.output_nodes[0].value >= 0.0;
+        action[1] = mx.output_nodes[1].value >= 0.0;
+        action[2] = mx.output_nodes[2].value >= 0.0;
+    }
 
     action
     

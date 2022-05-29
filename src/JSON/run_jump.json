@@ -1,0 +1,140 @@
+{
+    "input_nodes": [
+      {
+        "bias": 1,
+        "value": 1.0
+      },
+      {
+        "bias": 1,
+        "value": 1.0
+      },
+      {
+        "bias": 1,
+        "value": 1.0
+      },
+      {
+        "bias": 1,
+        "value": 1.0
+      },
+      {
+        "bias": 1,
+        "value": 1.0
+      }
+    ],
+    "hidden_nodes":[[
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    ],
+    [
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    ]],
+    "output_nodes": [
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "bias": 1,
+        "value": 1.0,
+        "weights": [
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  }
