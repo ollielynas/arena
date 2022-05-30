@@ -1,5 +1,7 @@
 // #![windows_subsystem = "windows"]
 
+mod structs;
+use structs::config::{Config, read_config};
 
 use std::thread;
 use std::{
@@ -15,6 +17,8 @@ mod seg;
 use once_cell::sync::Lazy; // 1.3.1
 
 use std::sync::Mutex;
+use serde_derive::Deserialize;
+
 static ARRAY: Lazy<Mutex<Vec<PhysObj>>> = Lazy::new(|| Mutex::new(vec![]));
 
 use std::fs;
@@ -27,7 +31,8 @@ use speedy2d::shape::{Rectangle};
 use speedy2d::{Graphics2D, Window};
 use speedy2d::window::{MouseButton, WindowHandler, WindowHelper};
 
-use std::process::Command;
+
+
 
 
 
@@ -200,8 +205,8 @@ o8o        o888o `Y888""8o o888o o888o o888o      8""88888P'  o888o o888o o888o 
 fn main_sim(brain:u8, render:bool) -> BrainScore {
 
     let brain_lookup:Vec<String> = vec![
-        "src/JSON/run.json".to_string(),
-        "src/JSON/run_jump.json".to_string()
+        "src/assets/run.json".to_string(),
+        "src/assets/run_jump.json".to_string()
         ];
 
     let mut matrix_str: String = std::fs::read_to_string(&brain_lookup[brain as usize]).unwrap();
@@ -682,8 +687,8 @@ ooooooooooooo  o8o
         if Instant::now().duration_since(self.timer) > Duration::from_secs(3) {
 
             let brain_lookup:Vec<String> = vec![
-                "src/JSON/run.json".to_string(),
-                "src/JSON/run_jump.json".to_string()
+                "src/assets/run.json".to_string(),
+                "src/assets/run_jump.json".to_string()
             ];
 
             self.timer = Instant::now();
@@ -697,8 +702,16 @@ ooooooooooooo  o8o
 }
 
 fn generate_new_network() {
-    smooth_brain::v1::new_matrix(2.0,4.0,10.0,2.0);
+    let c = read_config().network;
+    smooth_brain::v1::new_matrix(
+        c.input,
+        c.layers,
+        c.nodes,
+        c.output
+    );
 }
+
+
 
 
 
@@ -725,7 +738,6 @@ fn main() {
     // let mut brain = 0;
 
     // rust piston popup input 
-
 
 
 
@@ -756,9 +768,16 @@ fn main() {
 
     let mut rsrc_dir = std::env::current_exe()
     .expect("Can't find path to executable");
-    rsrc_dir.pop();
-    rsrc_dir.push("JSON");
-    
+
+
+
+
+    println!("{:?}", read_config());
+
+
+
+
+
     let brain:u8 = 0;
 
         thread::spawn( move|| {
@@ -798,8 +817,8 @@ fn main() {
         }
 
         let brain_lookup:Vec<String> = vec![
-            "src/JSON/run.json".to_string(),
-            "src/JSON/run_jump.json".to_string()
+            "src/assets/run.json".to_string(),
+            "src/assets/run_jump.json".to_string()
             ];
 
         if generation_result[best].brain.chars().count() > 10 {
@@ -819,8 +838,8 @@ fn main() {
 
 
         let brain_lookup:Vec<String> = vec![
-            "src/JSON/run.json".to_string(),
-            "src/JSON/run_jump.json".to_string()
+            "src/assets/run.json".to_string(),
+            "src/assets/run_jump.json".to_string()
         ];
 
     let matrix_str: String = std::fs::read_to_string(&brain_lookup[*&brain as usize]).unwrap();

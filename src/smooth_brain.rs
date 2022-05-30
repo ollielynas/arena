@@ -7,9 +7,10 @@ pub mod v1 {
 use serde_derive::{Deserialize, Serialize};
 use rand::Rng;
 extern crate clipboard;
-
 use clipboard::ClipboardProvider;
 use clipboard::ClipboardContext;
+
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputNode {
