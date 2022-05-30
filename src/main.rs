@@ -1,7 +1,7 @@
 // #![windows_subsystem = "windows"]
 
 mod structs;
-use structs::config::{Config, read_config};
+pub use structs::config::{Config, read_config};
 
 use std::thread;
 use std::{
@@ -452,8 +452,7 @@ oooooooooo.
  888      888  888      .oP"888    `88..]88..8'   
  888     d88'  888     d8(  888     `888'`888'    
 o888bood8P'   d888b    `Y888""8o     `8'  `8'     
-                                                  
-                                                  
+
                                                   */
 
     fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D)
@@ -707,7 +706,8 @@ fn generate_new_network() {
         c.input,
         c.layers,
         c.nodes,
-        c.output
+        c.output,
+        c.structure // [cone, linear]
     );
 }
 

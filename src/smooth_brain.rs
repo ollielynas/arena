@@ -4,6 +4,8 @@ pub mod v1 {
 // output behavior in the form of a list of strings that say which
 // outputs include ["move_left", "move_right", "jump", "attack_up", "attack_down", "attack"]
 
+
+
 use serde_derive::{Deserialize, Serialize};
 use rand::Rng;
 extern crate clipboard;
@@ -69,7 +71,7 @@ pub struct Matrix2442 {
 
     }
 
-    pub fn new_matrix(inputs: f32, layers:f32, nodes:f32, outputs:f32) -> String {
+    pub fn new_matrix(inputs: f32, layers:f32, nodes:f32, outputs:f32, mx_type:String) -> String {
         let mut nmx = Matrix2442 {
             input_nodes: Vec::new(),
             hidden_nodes: Vec::new(),
@@ -91,9 +93,16 @@ pub struct Matrix2442 {
                     weights_list.push(0.0)
                 }
             }else {
+                if mx_type == "linear" {
                 for _ in 0..nodes as usize {
                     weights_list.push(0.0)
+                } if mx_type == "cone" {
+                    for _ in 0..((nodes)-((2.0*nodes)/layers-i as f32)) as usize {
+                        weights_list.push(0.0)
+                    }
                 }
+            }
+
             }
             nmx.hidden_nodes.push(Vec::new());
             for _ in 0..nodes as usize {

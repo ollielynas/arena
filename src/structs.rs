@@ -13,7 +13,7 @@ pub struct Network {
     pub layers: f32,
     pub nodes: f32,
     pub output: f32,
-    pub cone_structure: bool
+    pub structure: String
 }
 
 pub fn read_config() -> Config {
