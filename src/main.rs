@@ -557,7 +557,7 @@ o888bood8P'   d888b    `Y888""8o     `8'  `8'
                 let space_y = 300.0/mtx.hidden_nodes[l].len() as f32;
                 graphics.draw_circle(((l as f32*space_x)+ 150.0,350.0+(n as f32*space_y)), 4.0, Color::BLACK);
                 if l > 0 {
-                for p in 0..mtx.hidden_nodes[l-1].len() {
+                for p in 0..(mtx.hidden_nodes[l].len()) {
                 let mut weight = 0.5;
                 if mtx.hidden_nodes[l][n].weights[p].abs() > 0.5 {
                     weight = 0.6

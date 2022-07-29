@@ -13,7 +13,6 @@ use clipboard::ClipboardProvider;
 use clipboard::ClipboardContext;
 
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputNode {
     pub bias:f32,
@@ -71,6 +70,14 @@ pub struct Matrix2442 {
 
     }
 
+    pub trait Literal {
+        fn literal(&self) -> String;
+    }
+
+    
+impl Literal for String { fn literal(&self) -> String { return self.clone() } }
+impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
+
     pub fn new_matrix(inputs: f32, layers:f32, nodes:f32, outputs:f32, mx_type:String) -> String {
         let mut nmx = Matrix2442 {
             input_nodes: Vec::new(),
@@ -93,16 +100,22 @@ pub struct Matrix2442 {
                     weights_list.push(0.0)
                 }
             }else {
+                let mx_type_vec = mx_type.split("-").collect::<Vec<&str>>();
                 if mx_type == "linear" {
+                    println!("linear");
                 for _ in 0..nodes as usize {
                     weights_list.push(0.0)
-                } if mx_type == "cone" {
-                    for _ in 0..((nodes)-((2.0*nodes)/layers-i as f32)) as usize {
-                        weights_list.push(0.0)
-                    }
                 }
             }
 
+                if mx_type_vec[0] == "cone" {
+                    println!("cone");
+                    println!("{:?}", mx_type_vec[1].parse::<f32>().unwrap());
+                    for _ in 0..(nodes-(mx_type_vec[1].parse::<f32>().unwrap()*i as f32)) as usize {
+                        weights_list.push(0.0)
+                    }
+                    weights_list.reverse();
+                }
             }
             nmx.hidden_nodes.push(Vec::new());
             for _ in 0..nodes as usize {

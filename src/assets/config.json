@@ -3,8 +3,8 @@
 "network":{
     "input" : 2.0,
     "layers" : 4.0,
-    "nodes" : 10.0,
+    "nodes" : 14.0,
     "output" : 2.0,
-    "structure" : "cone"
+    "structure" : "linear"
 }
 }
